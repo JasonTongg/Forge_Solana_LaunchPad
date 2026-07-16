@@ -13,7 +13,7 @@
     "setup": "npm run anchor-build && npm run codama:js",
     "start": "next start"
   },
-  "description": "Next.js, Tailwind, @solana/kit, Anchor vault program",
+  "description": "Forge — a Solana token launchpad with an on-chain bonding-curve Anchor program",
   "keywords": [
     "anchor",
     "kit",
@@ -34,7 +34,6 @@
     "@wallet-standard/base": "^1.1.0",
     "@wallet-standard/features": "^1.1.0",
     "next": "16.2.6",
-    "next-themes": "^0.4.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "sonner": "^2.0.7",

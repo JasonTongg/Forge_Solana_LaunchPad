@@ -1,12 +1,8 @@
-# forge-launchpad
+# Forge
 
-Next.js starter with Tailwind CSS, `@solana/kit`, and an Anchor vault program example.
-
-## Getting Started
-
-```shell
-npx -y create-solana-dapp@latest -t solana-foundation/templates/kit/forge-launchpad
-```
+A Solana token launchpad — create SPL tokens and trade them instantly against a transparent,
+on-chain bonding curve. No backend, no indexer: everything the UI shows is read straight from the
+chain (account state and program event logs).
 
 ```shell
 npm install
@@ -14,23 +10,26 @@ npm run setup   # Builds the Anchor program and generates the TypeScript client
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000), connect your wallet, and interact with the vault.
+Open [http://localhost:3000](http://localhost:3000), connect a devnet wallet, and launch a token.
 
 ## What's Included
 
-- **Wallet connection** via wallet-standard with auto-discovery and dropdown UI
-- **Cluster switching** — devnet, testnet, mainnet, and localnet from the header
-- **Wallet balance** display with airdrop button (devnet/testnet/localnet)
-- **SOL Vault program** — deposit and withdraw SOL from a personal PDA vault
-- **Toast notifications** with explorer links for every transaction
-- **Error handling** — human-readable messages for common Solana and program errors
-- **Codama-generated client** — type-safe program interactions using `@solana/kit`
-- **Tailwind CSS v4** with light/dark mode toggle
+- **Explore** — a marketplace grid of every token launched through the program, with live price,
+  market cap, holder count, and bonding-curve progress.
+- **Create** — launch a fixed-supply SPL token with a configurable creator allocation, starting
+  price, and Linear/Exponential bonding curve, with a live preview before you submit.
+- **Trade** — a token detail page with a real price chart, recent trades, and a buy/sell panel,
+  all derived from on-chain `TradeEvent`s decoded client-side.
+- **Portfolio** — your holdings, average entry price and P&L, and the tokens you've launched
+  (including trading fees earned as a creator).
+- **Wallet connection** via wallet-standard with auto-discovery.
+- **Cluster switching** — devnet, testnet, mainnet, and localnet from the header.
+- **Codama-generated client** — type-safe program interactions using `@solana/kit`.
 
 ## Stack
 
 | Layer          | Technology                       |
-| -------------- | -------------------------------- |
+| -------------- | --------------------------------- |
 | Frontend       | Next.js 16, React 19, TypeScript |
 | Styling        | Tailwind CSS v4                  |
 | Solana Client  | `@solana/kit`, wallet-standard   |
@@ -42,32 +41,41 @@ Open [http://localhost:3000](http://localhost:3000), connect your wallet, and in
 ```
 ├── app/
 │   ├── components/
-│   │   ├── cluster-context.tsx  # Cluster state (React context + localStorage)
-│   │   ├── cluster-select.tsx   # Cluster switcher dropdown
-│   │   ├── grid-background.tsx  # Solana-branded decorative grid
-│   │   ├── providers.tsx        # Wallet + theme providers
-│   │   ├── theme-toggle.tsx     # Light/dark mode toggle
-│   │   ├── vault-card.tsx       # Vault deposit/withdraw UI
-│   │   └── wallet-button.tsx    # Wallet connect/disconnect dropdown
-│   ├── generated/vault/        # Codama-generated program client
+│   │   ├── nav.tsx               # Top nav: logo, page links, search, wallet
+│   │   ├── wallet-modal.tsx      # Wallet connect/disconnect modal
+│   │   ├── wallet-button.tsx     # Connect button / connected pill
+│   │   ├── token-card.tsx        # Explore grid card
+│   │   ├── price-chart.tsx       # Detail page price + volume chart
+│   │   ├── recent-trades.tsx     # Detail page trade feed
+│   │   ├── trading-panel.tsx     # Detail page buy/sell panel
+│   │   ├── cluster-context.tsx   # Cluster state (React context + localStorage)
+│   │   ├── cluster-select.tsx    # Cluster switcher dropdown
+│   │   └── providers.tsx         # Wallet + cluster + wallet-modal providers
+│   ├── generated/launchpad/      # Codama-generated program client
 │   ├── lib/
-│   │   ├── wallet/             # Wallet-standard connection layer
-│   │   │   ├── types.ts        # Wallet types
-│   │   │   ├── standard.ts     # Wallet discovery + session creation
-│   │   │   ├── signer.ts       # WalletSession → TransactionSigner
-│   │   │   └── context.tsx     # WalletProvider + useWallet() hook
+│   │   ├── bonding-curve.ts      # TS mirror of the on-chain curve math (previews)
+│   │   ├── trade-event.ts        # Decodes TradeEvent from transaction logs
+│   │   ├── portfolio-math.ts     # Weighted-average-cost P&L accounting
+│   │   ├── gradient-avatar.ts    # Deterministic token logo/banner gradients
+│   │   ├── launchpad-errors.ts   # Program error -> human-readable message
+│   │   ├── wallet/               # Wallet-standard connection layer + modal state
 │   │   ├── hooks/
-│   │   │   ├── use-balance.ts  # SWR-based balance fetching
-│   │   │   └── use-send-transaction.ts  # Transaction send with loading state
-│   │   ├── cluster.ts          # Cluster endpoints + RPC factory
-│   │   ├── lamports.ts         # SOL/lamports conversion
-│   │   ├── send-transaction.ts # Transaction build + sign + send pipeline
-│   │   ├── errors.ts           # Transaction error parsing
-│   │   └── explorer.ts         # Explorer URL builder + address helpers
-│   └── page.tsx                # Main page
-├── anchor/                     # Anchor workspace
-│   └── programs/vault/         # Vault program (Rust)
-└── codama.json                 # Codama client generation config
+│   │   │   ├── use-tokens.ts               # All launched tokens (getProgramAccounts)
+│   │   │   ├── use-curve.ts                # One token's live curve state
+│   │   │   ├── use-token-balance.ts        # Wallet SPL balances
+│   │   │   ├── use-trade-history.ts        # Decoded on-chain trade history
+│   │   │   ├── use-portfolio-positions.ts  # Cross-mint P&L for Portfolio
+│   │   │   ├── use-holder-count.ts         # Per-token holder count
+│   │   │   └── use-send-transaction.ts     # Transaction send with loading state
+│   │   ├── cluster.ts / solana-client.ts   # Cluster endpoints + RPC client factory
+│   │   └── lamports.ts / explorer.ts       # Formatting helpers
+│   ├── page.tsx                  # Explore (marketplace)
+│   ├── create/page.tsx           # Create a token
+│   ├── token/[mint]/page.tsx     # Token detail + trading
+│   └── portfolio/page.tsx        # Portfolio
+├── anchor/                       # Anchor workspace
+│   └── programs/launchpad/       # Bonding-curve launchpad program (Rust)
+└── codama.json                   # Codama client generation config
 ```
 
 ## Local Development
@@ -93,58 +101,22 @@ To test against a local validator instead of devnet:
 
 3. **Switch to localnet** in the app using the cluster selector in the header.
 
-## Deploy Your Own Vault
+## Deploy Your Own Program
 
-The included vault program is already deployed to devnet. To deploy your own:
-
-### Prerequisites
-
-- [Rust](https://rustup.rs/)
-- [Solana CLI](https://solana.com/docs/intro/installation)
-- [Anchor](https://www.anchor-lang.com/docs/installation)
-
-### Steps
-
-1. **Configure Solana CLI for devnet**
-
-   ```bash
-   solana config set --url devnet
-   ```
-
-2. **Create a wallet (if needed) and fund it**
-
-   ```bash
-   solana-keygen new
-   solana airdrop 2
-   ```
-
-3. **Build and deploy the program**
-
-   ```bash
-   cd anchor
-   anchor build
-   anchor keys sync    # Updates program ID in source
-   anchor build        # Rebuild with new ID
-   anchor deploy
-   cd ..
-   ```
-
-4. **Regenerate the client and restart**
-   ```bash
-   npm run setup   # Rebuilds program and regenerates client
-   npm run dev
-   ```
+The included launchpad program is already deployed to devnet. See
+[`anchor/README.md`](anchor/README.md) for the steps to deploy your own.
 
 ## Testing
 
-Tests use [LiteSVM](https://github.com/LiteSVM/litesvm), a fast lightweight Solana VM for testing.
+Program tests use [LiteSVM](https://github.com/LiteSVM/litesvm), a fast lightweight Solana VM.
 
 ```bash
 npm run anchor-build   # Build the program first
 npm run anchor-test    # Run tests
 ```
 
-The tests are in `anchor/programs/vault/src/tests.rs` and automatically use the program ID from `declare_id!`.
+Tests are in `anchor/programs/launchpad/src/tests.rs` and cover token creation, buy/sell math and
+fee splits, slippage rejection, and sold-out rejection.
 
 ## Regenerating the Client
 
@@ -154,7 +126,8 @@ If you modify the program, regenerate the TypeScript client:
 npm run setup   # Or: npm run anchor-build && npm run codama:js
 ```
 
-This uses [Codama](https://github.com/codama-idl/codama) to generate a type-safe client from the Anchor IDL.
+This uses [Codama](https://github.com/codama-idl/codama) to generate a type-safe client from the
+Anchor IDL.
 
 ## Learn More
 

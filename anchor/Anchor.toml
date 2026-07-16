@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-vault = "Eu2v5tcboZkNHzaEuFjV1sGi4e3RUdhmurwyqgQo1h1e"
+launchpad = "ANaWxoKwFSv5MfMQuxpxheqpVuL84ixG5d8eVUyVjU5N"
 
 [provider]
 cluster = "devnet"
