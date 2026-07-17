@@ -1,8 +1,11 @@
+<img width="1264" height="905" alt="image" src="https://github.com/user-attachments/assets/46f95351-0a05-461f-b386-29778b587493" />
+
+
 # Forge — On-Chain Token Launchpad on Solana
 
 A fully on-chain token launchpad built with **Anchor** on Solana. Anyone can launch a fixed-supply
 SPL token in one transaction and trade it instantly against a transparent, constant-product
-bonding curve — all state lives in Program Derived Addresses (PDAs), with no backend, no
+bonding curve. all state lives in Program Derived Addresses (PDAs), with no backend, no
 indexer, and no off-chain order book.
 
 - **Live demo:** [https://forge-sol.vercel.app/](https://forge-sol.vercel.app/)
@@ -12,7 +15,7 @@ indexer, and no off-chain order book.
 
 Fair token launches need two things to be trustworthy: a price that's set by an open formula
 instead of a team, and a market that can't be rug-pulled by withdrawing liquidity. Building
-directly on Solana with Anchor gets both for free — every launch, buy, and sell is a signed
+directly on Solana with Anchor gets both for free. every launch, buy, and sell is a signed
 on-chain instruction against a PDA, readable and verifiable by anyone via `getProgramAccounts`,
 with sub-cent fees and sub-second finality.
 
@@ -30,14 +33,14 @@ This repo demonstrates the full lifecycle of such a launch:
 Every token is backed by a `Curve` account holding virtual and real SOL/token reserves under the
 same `x·y=k` invariant used by constant-product AMMs. Buying moves SOL into the curve and tokens
 out to the buyer, shrinking the token side of the pool and pushing the price up along the curve;
-selling reverses it. Nobody sets a price — it falls out of the reserves:
+selling reverses it. Nobody sets a price. it falls out of the reserves:
 
 ```
 price = virtual_sol_reserves / virtual_token_reserves
 ```
 
 The Linear vs. Exponential picker at creation only changes the starting virtual-reserve ratio
-(flatter vs. steeper early price growth) — both use the exact same overflow-checked integer math,
+(flatter vs. steeper early price growth). both use the exact same overflow-checked integer math,
 so there's no separate, riskier formula hiding behind the choice.
 
 ### Program Derived Addresses (PDAs)
@@ -51,12 +54,12 @@ program:
   seeded by `["treasury"]`
 
 Anyone can reconstruct the entire token marketplace client-side by filtering the program's
-accounts by discriminator — exactly how the frontend's Explore page works, with no indexer sitting
+accounts by discriminator. exactly how the frontend's Explore page works, with no indexer sitting
 in between.
 
 ### Anchor Framework
 
-**Anchor** is Solana's smart contract framework — Solana's equivalent of Foundry/Hardhat for EVM.
+**Anchor** is Solana's smart contract framework. Solana's equivalent of Foundry/Hardhat for EVM.
 It handles account validation, serialization, PDA bump derivation, and IDL generation, so the
 program logic in `lib.rs` stays focused on the actual business rules (curve math, fee splits,
 slippage checks) instead of boilerplate.
@@ -170,7 +173,7 @@ This project uses:
 3. **Sell** — a token holder calls `sell` with a token amount; the same formula computes SOL out,
    with the same fee split, paid directly from the curve's own reserves
 
-There's no resolution step — unlike a prediction market, a bonding curve is continuously priced,
+There's no resolution step. unlike a prediction market, a bonding curve is continuously priced,
 so the frontend's token detail page just mirrors the curve's live reserves into a chart, a trade
 feed decoded straight from transaction logs, and a buy/sell panel, all updating in real time as
 the on-chain state changes.
