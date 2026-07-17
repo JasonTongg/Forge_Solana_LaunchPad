@@ -47,6 +47,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className="dark">
       <body
         className={`${spaceGrotesk.variable} ${jetBrainsMono.variable} ${unbounded.variable} antialiased`}
+        suppressHydrationWarning
       >
         <Providers>
           <Nav />

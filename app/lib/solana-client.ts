@@ -1,5 +1,6 @@
 import { createEmptyClient } from "@solana/kit";
 import { rpc, rpcAirdrop } from "@solana/kit-plugin-rpc";
+import { failoverRpc, getDevnetRpcUrls } from "./rpc-failover";
 
 export type ClusterMoniker = "devnet" | "testnet" | "mainnet" | "localnet";
 
@@ -33,8 +34,17 @@ export function getClusterWsConfig(cluster: ClusterMoniker) {
 }
 
 export function createSolanaClient(cluster: ClusterMoniker) {
-  const url = CLUSTER_URLS[cluster];
   const wsUrl = WS_URLS[cluster];
+
+  if (cluster === "devnet") {
+    // Devnet reads (chart history, holder counts, ...) are the heaviest RPC users in this app,
+    // so try dedicated providers first and only fall back to the shared public endpoint.
+    return createEmptyClient()
+      .use(failoverRpc(getDevnetRpcUrls(), wsUrl))
+      .use(rpcAirdrop());
+  }
+
+  const url = CLUSTER_URLS[cluster];
   return createEmptyClient()
     .use(rpc(url, { url: wsUrl }))
     .use(rpcAirdrop());

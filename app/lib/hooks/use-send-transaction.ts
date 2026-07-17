@@ -7,6 +7,7 @@ import { createClient } from "@solana/kit-client-rpc";
 import { useWallet } from "../wallet/context";
 import { useCluster } from "../../components/cluster-context";
 import { getClusterUrl, getClusterWsConfig } from "../solana-client";
+import { createFailoverSendClient, getDevnetRpcUrls } from "../rpc-failover";
 
 export function useSendTransaction() {
   const { signer } = useWallet();
@@ -14,17 +15,20 @@ export function useSendTransaction() {
   const { mutate } = useSWRConfig();
   const [isSending, setIsSending] = useState(false);
 
-  const txClient = useMemo(
-    () =>
-      signer
-        ? createClient({
-            url: getClusterUrl(cluster),
-            rpcSubscriptionsConfig: getClusterWsConfig(cluster),
-            payer: signer,
-          })
-        : null,
-    [cluster, signer]
-  );
+  const txClient = useMemo(() => {
+    if (!signer) return null;
+    if (cluster === "devnet") {
+      // Same reasoning as the read client: try dedicated RPC providers before the shared
+      // public endpoint for the blockhash/simulation/confirmation calls sendTransaction makes.
+      const wsUrl = getClusterWsConfig(cluster)?.url ?? "wss://api.devnet.solana.com";
+      return createFailoverSendClient(getDevnetRpcUrls(), wsUrl, signer);
+    }
+    return createClient({
+      url: getClusterUrl(cluster),
+      rpcSubscriptionsConfig: getClusterWsConfig(cluster),
+      payer: signer,
+    });
+  }, [cluster, signer]);
 
   const send = useCallback(
     async ({ instructions }: { instructions: readonly Instruction[] }) => {
