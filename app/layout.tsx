@@ -31,11 +31,8 @@ export const metadata: Metadata = {
   title: "Forge — Launch your token on Solana",
   description:
     "Create and trade SPL tokens instantly, priced by a transparent on-chain bonding curve.",
-  icons: {
-    icon: "/icon.svg",
-    shortcut: "/icon.svg",
-    apple: "/icon.svg",
-  },
+  // No explicit `icons` here — Next.js's file-based convention picks up app/icon.png
+  // automatically and generates the right <link rel="icon"> tags for it.
 };
 
 export default function RootLayout({
